@@ -61,8 +61,7 @@
     when: ansible_distribution == "Amazon"
     vars:
       ansible_python_interpreter: /usr/bin/python3
-    when: ansible_distribution == "Amazon"
-  
+      
   - name: Clone Java Web Calculator
     git:
       repo: 'https://github.com/CeeyIT-Solutions/JavaWebCalculator.git'
