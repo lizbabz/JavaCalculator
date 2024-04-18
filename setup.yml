@@ -34,8 +34,7 @@
     when: ansible_distribution == "Amazon"
     vars:
       ansible_python_interpreter: /usr/bin/python3
-    when: ansible_distribution == "Amazon"
-
+      
   - name: Install Tomcat (Red Hat)
     yum:
       name: tomcat
@@ -59,6 +58,8 @@
       name: maven
       state: present
     when: ansible_distribution == "Amazon"
+    vars:
+      ansible_python_interpreter: /usr/bin/python
       
   - name: Clone Java Web Calculator
     git:
