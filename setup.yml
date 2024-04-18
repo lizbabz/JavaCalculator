@@ -55,7 +55,7 @@
     when: ansible_os_family == "RedHat"
   
   - name: Install Maven (Amazon Linux)
-    dnf:
+    yum:
       name: maven
       state: present
     when: ansible_os_family == "Amazon"
