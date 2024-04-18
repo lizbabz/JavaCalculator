@@ -41,7 +41,25 @@
       name: tomcat
       state: present
     when: ansible_distribution == "RedHat"
+   
+  - name: Install Maven
+    apt:
+      name: maven
+      state: present
+    when: ansible_os_family == "Debian"
 
+  - name: Install Maven
+    yum:
+      name: maven
+      state: present
+    when: ansible_os_family == "RedHat"
+  
+  - name: Install Maven
+    dnf:
+      name: maven
+      state: present
+    when: ansible_os_family == "Amazon"
+  
   - name: Clone Java Web Calculator
     git:
       repo: 'https://github.com/CeeyIT-Solutions/JavaWebCalculator.git'
