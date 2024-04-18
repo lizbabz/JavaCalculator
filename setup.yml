@@ -42,23 +42,26 @@
       state: present
     when: ansible_distribution == "RedHat"
    
-  - name: Install Maven
+  - name: Install Maven (Debian)
     apt:
       name: maven
       state: present
     when: ansible_os_family == "Debian"
 
-  - name: Install Maven
+  - name: Install Maven (RedHat)
     yum:
       name: maven
       state: present
     when: ansible_os_family == "RedHat"
   
-  - name: Install Maven
+  - name: Install Maven (Amazon Linux)
     dnf:
       name: maven
       state: present
     when: ansible_os_family == "Amazon"
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+    when: ansible_distribution == "Amazon"
   
   - name: Clone Java Web Calculator
     git:
