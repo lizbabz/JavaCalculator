@@ -1,0 +1,61 @@
+---
+- hosts: webservers
+  become: yes
+  tasks:
+  - name: Install Java (Debian)
+    apt:
+     name: default-jdk
+     update_cache: yes
+     state: present
+    when: ansible_distribution == "Debian"
+
+  - name: Install Java (Amazon Linux)
+    dnf:
+     name: java-11-amazon-corretto-headless
+     state: present
+    when: ansible_distribution == "Amazon"
+
+  - name: Install Java (Red Hat)
+    yum:
+      name: java-11-openjdk
+      state: present
+    when: ansible_distribution == "RedHat"
+
+  - name: Install Tomcat (Debian)
+    apt:
+      name: tomcat10
+      state: present
+    when: ansible_distribution == "Debian"
+
+  - name: Install Tomcat (Amazon Linux)
+    dnf:
+      name: tomcat9
+      state: present
+    when: ansible_distribution == "Amazon"
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+    when: ansible_distribution == "Amazon"
+
+  - name: Install Tomcat (Red Hat)
+    yum:
+      name: tomcat
+      state: present
+    when: ansible_distribution == "RedHat"
+
+  - name: Clone Java Web Calculator
+    git:
+      repo: 'https://github.com/CeeyIT-Solutions/JavaWebCalculator.git'
+      dest: "/var/lib/tomcat{{ '9' if ansible_distribution == 'Debian' else '' }}/webapps/JavaWebCalculator"
+
+  - name: Restart Tomcat (Debian)
+    service:
+      name: tomcat9
+      state: restarted
+    when: ansible_distribution == "Debian"
+
+  - name: Restart Tomcat (Red Hat or Amazon Linux)
+    service:
+      name: tomcat
+      state: restarted
+    when: ansible_distribution == "RedHat" or ansible_distribution == "Amazon"
+...
