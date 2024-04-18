@@ -58,7 +58,7 @@
     dnf:
       name: maven
       state: present
-    when: ansible_os_family == "Amazon"
+    when: ansible_distribution == "Amazon"
     vars:
       ansible_python_interpreter: /usr/bin/python3
     when: ansible_distribution == "Amazon"
