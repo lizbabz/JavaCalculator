@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Check out the source code from the Git repository
+                git 'https://github.com/lizbabz/JavaCalculator.git'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                 {
+                    // Determine if Maven is installed or install it if necessary, then run build
+                    if (isUnix()) {
+                        sh 'mvn -version || sudo apt-get install maven -y'
+                        sh 'mvn clean package'
+                    } else {
+                        bat 'mvn -version || choco install maven'
+                        bat 'mvn clean package'
+                    }
+                }
+            }
+        }
+        
+        stage('Deploy') {
+            steps {
+                // Deploy using the Ansible playbook
+                ansiblePlaybook(
+                    playbook: '/home/ubuntu/JavaCalculator/setup.yml',
+                    inventory: '/home/ubuntu/JavaCalculator/hosts.ini',
+                    credentialsId: 'AWS_CREDENTIALS',
+                    extras: ' -e ansible_python_interpreter=/usr/bin/python3'
+                )
+            }
+        }
+        
+        stage('Post-Deployment Check') {
+            steps {
+                // Additional steps to verify deployment
+                script {
+                    // Custom scripts or curl commands to check if the application is up
+                    echo "Checking application status..."
+                    sh 'curl http://<IP_OF_WEBSERVER>/JavaWebCalculator/'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            // Actions to take on successful pipeline completion
+            echo 'Deployment succeeded!'
+        }
+        failure {
+            // Actions to take if the pipeline fails
+            echo 'Deployment failed.'
+        }
+    }
+}
