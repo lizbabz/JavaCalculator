@@ -71,6 +71,24 @@
       state: started
     when: ansible_distribution == "Amazon"
 
+  - name: Enable Tomcat (Debian)
+    service:
+      name: tomcat10
+      state: enabled
+    when: ansible_distribution == "Debian"
+
+  - name: Enable Tomcat (Red Hat)
+    service:
+      name: tomcat
+      state: enabled
+    when: ansible_distribution == "RedHat"
+
+  - name: Enable Tomcat (Amazon Linux)
+    service:
+      name: tomcat9
+      state: enabled
+    when: ansible_distribution == "Amazon"
+
   - name: Clone Java Web Calculator
     git:
       repo: 'https://github.com/lizbabz/JavaCalculator.git'
