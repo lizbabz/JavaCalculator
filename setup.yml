@@ -98,4 +98,9 @@
     git:
       repo: 'https://github.com/lizbabz/JavaCalculator.git'
       dest: "/var/lib/tomcat{{ '10' if ansible_distribution == 'Debian' else '' }}/webapps/JavaWebCalculator"
+
+  - name: Clone Java Web Calculator (Red Hat)
+    git:
+      repo: 'https://github.com/lizbabz/JavaCalculator.git'
+      dest: "/var/lib/tomcat{{ '' if ansible_distribution == 'RedHat' else '10' }}/webapps/JavaWebCalculator"
 ...
