@@ -8,30 +8,14 @@ pipeline {
                 git 'https://github.com/lizbabz/JavaCalculator.git'
             }
         }
-
+        
         stage('Build') {
             steps {
-                // Only compile the project, do not package
-                sh 'mvn clean compile'
+                // Build the project using Maven
+                sh 'mvn clean package'
             }
         }
         
-        stage('Test') {
-            steps {
-                // Run unit tests and generate test reports
-                sh 'mvn test'
-                // Optionally, you can add steps to archive the test results or integrate with other tools
-                junit '**/target/surefire-reports/TEST-*.xml'
-            }
-        }
-        
-        stage('Package') {
-            steps {
-                // Package the compiled code into a deployable artifact
-                sh 'mvn package -DskipTests' // Skip tests because they were already run
-            }
-        }
-
         stage('Deploy') {
             steps {
                 // Deploy using the Ansible playbook
@@ -46,12 +30,16 @@ pipeline {
         
         stage('Post-Deployment Check') {
             steps {
-                // Additional steps to verify deployment
                 script {
-                    echo "Checking application status..."
-                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://<IP_OF_WEBSERVER>/JavaWebCalculator/", returnStdout: true).trim()
-                    if (response != '200') {
-                        error "Failed to access the Java Web Calculator, response code: ${response}"
+                    // Define a list of server IPs
+                    def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
+                    // Iterate through each IP to check if the application is accessible
+                    serverIps.each { ip ->
+                        echo "Checking application status on server: ${ip}"
+                        def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}/JavaWebCalculator/", returnStdout: true).trim()
+                        if (response != '200') {
+                            error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
+                        }
                     }
                 }
             }
@@ -60,17 +48,16 @@ pipeline {
 
     post {
         always {
-            // Actions to take in all cases after the pipeline finishes
+            // Clean up the workspace after the pipeline finishes
             cleanWs()
         }
         success {
-            // Actions to take on successful pipeline completion
+            // Actions to take if the pipeline completes successfully
             echo 'Deployment succeeded!'
         }
         failure {
             // Actions to take if the pipeline fails
             echo 'Deployment failed.'
-            // Optionally, add notifications here as well
         }
     }
 }
