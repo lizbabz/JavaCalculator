@@ -27,33 +27,33 @@ pipeline {
         stage('Build') {
             steps {
                 // Build the project using Maven
-                sh 'mvn clean package'
+                ws('/home/ubuntu/JavaCalculator') {
+                    sh 'mvn clean package'
+                }
             }
         }
         
         stage('Deploy') {
             steps {
-                // Deploy using the Ansible playbook
-                ansiblePlaybook(
-                    playbook: '/home/ubuntu/JavaCalculator/webservers.yml',
-                    inventory: '/home/ubuntu/JavaCalculator/hosts.ini',
-                    credentialsId: 'aws-jenkins',
-                    extras: ' -e ansible_python_interpreter=/usr/bin/python3'
-                )
+                ws('/home/ubuntu/JavaCalculator') {
+                    sh 'ansible-playbook -vvv webservers.yml -i hosts.ini -e ansible_python_interpreter=/usr/bin/python3'
+                }
             }
         }
         
         stage('Post-Deployment Check') {
             steps {
-                script {
-                    // Define a list of server IPs
-                    def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
-                    // Iterate through each IP to check if the application is accessible
-                    serverIps.each { ip ->
-                        echo "Checking application status on server: ${ip}"
-                        def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}/JavaWebCalculator/", returnStdout: true).trim()
-                        if (response != '200') {
-                            error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
+                ws('/home/ubuntu/JavaCalculator') {
+                    script {
+                        // Define a list of server IPs
+                        def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
+                        // Iterate through each IP to check if the application is accessible
+                        serverIps.each { ip ->
+                            echo "Checking application status on server: ${ip}"
+                            def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}/JavaWebCalculator/", returnStdout: true).trim()
+                            if (response != '200') {
+                                error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
+                            }
                         }
                     }
                 }
@@ -62,10 +62,6 @@ pipeline {
     }
 
     post {
-        always {
-            // Clean up the workspace after the pipeline finishes
-            cleanWs()
-        }
         success {
             // Actions to take if the pipeline completes successfully
             echo 'Deployment succeeded!'
