@@ -16,10 +16,17 @@
       RedHat: "tomcat"
 
   tasks:
-    - name: Install Java
+    - name: Install Java (Use dnf for Amazon Linux)
       package:
         name: "{{ java_package_name[ansible_distribution] }}"
         state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Java (Amazon Linux)
+      dnf:
+        name: "{{ java_package_name['Amazon'] }}"
+        state: present
+      when: ansible_distribution == 'Amazon'
 
     - name: Install Tomcat
       package:
@@ -29,6 +36,11 @@
     - name: Install Maven
       package:
         name: "maven"
+        state: present
+
+    - name: Install Git
+      package:
+        name: "git"
         state: present
 
     - name: Ensure Tomcat is running and enabled
