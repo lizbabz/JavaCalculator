@@ -38,7 +38,7 @@ pipeline {
                 ansiblePlaybook(
                     playbook: '/home/ubuntu/JavaCalculator/webservers.yml',
                     inventory: '/home/ubuntu/JavaCalculator/hosts.ini',
-                    credentialsId: 'AWS_CREDENTIALS',
+                    credentialsId: 'aws-jenkins',
                     extras: ' -e ansible_python_interpreter=/usr/bin/python3'
                 )
             }
