@@ -73,13 +73,13 @@
     - name: Deploy Java Web Calculator (Debian)
       copy:
         src: "/home/ubuntu/JavaCalculator/target/*.war"
-        dest: "/usr/share/tomcat10/webapps/"
+        dest: "/var/lib/tomcat10/webapps/"
       notify: restart tomcat
 
     - name: Deploy Java Web Calculator (Amazon Linux)
       copy:
         src: "/home/ubuntu/JavaCalculator/target/*.war"
-        dest: "/var/lib/tomcat10/webapps/"
+        dest: "/var/lib/tomcat9/webapps/"
       notify: restart tomcat
 
     - name: Deploy Java Web Calculator (Red Hat)
