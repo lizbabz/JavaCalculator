@@ -79,13 +79,13 @@
     - name: Deploy Java Web Calculator (Amazon Linux)
       copy:
         src: "/home/ubuntu/JavaCalculator/target/*.war"
-        dest: "/etc/tomcat9/webapps/"
+        dest: "/var/lib/tomcat10/webapps/"
       notify: restart tomcat
 
     - name: Deploy Java Web Calculator (Red Hat)
       copy:
         src: "/home/ubuntu/JavaCalculator/target/*.war"
-        dest: "/etc/tomcat/webapps/"
+        dest: "/var/lib/tomcat/webapps"
       notify: restart tomcat
 
   handlers:
