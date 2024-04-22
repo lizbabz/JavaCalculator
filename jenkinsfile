@@ -36,7 +36,7 @@ pipeline {
             steps {
                 // Deploy using the Ansible playbook
                 ansiblePlaybook(
-                    playbook: '/home/ubuntu/JavaCalculator/setup.yml',
+                    playbook: '/home/ubuntu/JavaCalculator/webservers.yml',
                     inventory: '/home/ubuntu/JavaCalculator/hosts.ini',
                     credentialsId: 'AWS_CREDENTIALS',
                     extras: ' -e ansible_python_interpreter=/usr/bin/python3'
