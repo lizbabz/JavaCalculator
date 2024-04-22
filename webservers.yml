@@ -69,22 +69,21 @@
         name: "{{ tomcat_service_name[ansible_distribution] }}"
         state: started
         enabled: true
-
     - name: Clone Java Web Calculator (Debian)
       git:
         repo: 'https://github.com/lizbabz/JavaCalculator.git'
-        dest: "/usr/share/tomcat10/webapps/JavaWebCalculator"
+        dest: "/home/ubuntu/JavaCalculator/webapps/JavaWebCalculator"
       when: ansible_distribution == 'Debian'
-
+    
     - name: Clone Java Web Calculator (Amazon Linux)
       git:
         repo: 'https://github.com/lizbabz/JavaCalculator.git'
-        dest: "/etc/tomcat9/webapps/JavaWebCalculator"
+        dest: "/home/ubuntu/JavaCalculator/webapps/JavaWebCalculator"
       when: ansible_distribution == 'Amazon'
-
+    
     - name: Clone Java Web Calculator (Red Hat)
       git:
         repo: 'https://github.com/lizbabz/JavaCalculator.git'
-        dest: "/etc/tomcat/webapps/JavaWebCalculator"
+        dest: "/home/ubuntu/JavaCalculator/webapps/JavaWebCalculator"
       when: ansible_distribution == 'RedHat'
 ...
