@@ -8,22 +8,30 @@ pipeline {
                 git 'https://github.com/lizbabz/JavaCalculator.git'
             }
         }
-        
+
         stage('Build') {
             steps {
-                 {
-                    // Determine if Maven is installed or install it if necessary, then run build
-                    if (isUnix()) {
-                        sh 'mvn -version || sudo apt-get install maven -y'
-                        sh 'mvn clean package'
-                    } else {
-                        bat 'mvn -version || choco install maven'
-                        bat 'mvn clean package'
-                    }
-                }
+                // Only compile the project, do not package
+                sh 'mvn clean compile'
             }
         }
         
+        stage('Test') {
+            steps {
+                // Run unit tests and generate test reports
+                sh 'mvn test'
+                // Optionally, you can add steps to archive the test results or integrate with other tools
+                junit '**/target/surefire-reports/TEST-*.xml'
+            }
+        }
+        
+        stage('Package') {
+            steps {
+                // Package the compiled code into a deployable artifact
+                sh 'mvn package -DskipTests' // Skip tests because they were already run
+            }
+        }
+
         stage('Deploy') {
             steps {
                 // Deploy using the Ansible playbook
@@ -40,15 +48,21 @@ pipeline {
             steps {
                 // Additional steps to verify deployment
                 script {
-                    // Custom scripts or curl commands to check if the application is up
                     echo "Checking application status..."
-                    sh 'curl http://<IP_OF_WEBSERVER>/JavaWebCalculator/'
+                    def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://<IP_OF_WEBSERVER>/JavaWebCalculator/", returnStdout: true).trim()
+                    if (response != '200') {
+                        error "Failed to access the Java Web Calculator, response code: ${response}"
+                    }
                 }
             }
         }
     }
 
     post {
+        always {
+            // Actions to take in all cases after the pipeline finishes
+            cleanWs()
+        }
         success {
             // Actions to take on successful pipeline completion
             echo 'Deployment succeeded!'
@@ -56,6 +70,7 @@ pipeline {
         failure {
             // Actions to take if the pipeline fails
             echo 'Deployment failed.'
+            // Optionally, add notifications here as well
         }
     }
 }
