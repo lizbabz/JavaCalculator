@@ -16,7 +16,7 @@
       RedHat: "tomcat"
 
   tasks:
-    - name: Install Java (Use dnf for Amazon Linux)
+    - name: Install Java
       package:
         name: "{{ java_package_name[ansible_distribution] }}"
         state: present
@@ -28,10 +28,17 @@
         state: present
       when: ansible_distribution == 'Amazon'
 
-    - name: Install Tomcat
+    - name: Install Tomcat (Non-Amazon)
       package:
         name: "{{ tomcat_package_name[ansible_distribution] }}"
         state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Tomcat (Amazon Linux)
+      dnf:
+        name: "{{ tomcat_package_name['Amazon'] }}"
+        state: present
+      when: ansible_distribution == 'Amazon'
 
     - name: Install Maven
       package:
