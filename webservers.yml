@@ -52,10 +52,93 @@
         state: present
       when: ansible_distribution == 'Amazon'
 
-    - name: Install Git
+    - name: Install Git (Non-Amazon)
       package:
         name: "git"
         state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Git (Amazon Linux)
+      dnf:
+        name: "git"
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Ensure Tomcat is running and enabled
+      service:
+        name: "{{ tomcat_service_name[ansible_distribution] }}"
+        state: started
+        enabled: true
+
+    - name: Clone Java Web Calculator
+      git:
+        repo: 'https://github.com/lizbabz/JavaCalculator.git'
+        dest: "/var/lib/{{ tomcat_service_name[ansible_distribution] }}/webapps/JavaWebCalculator"
+---
+- hosts: webservers
+  become: yes
+  vars:
+    java_package_name:
+      Debian: "default-jdk"
+      Amazon: "java-11-amazon-corretto-headless"
+      RedHat: "java-11-openjdk"
+    tomcat_package_name:
+      Debian: "tomcat10"
+      Amazon: "tomcat9"
+      RedHat: "tomcat"
+    tomcat_service_name:
+      Debian: "tomcat10"
+      Amazon: "tomcat9"
+      RedHat: "tomcat"
+
+  tasks:
+    - name: Install Java
+      package:
+        name: "{{ java_package_name[ansible_distribution] }}"
+        state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Java (Amazon Linux)
+      dnf:
+        name: "{{ java_package_name['Amazon'] }}"
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Tomcat (Non-Amazon)
+      package:
+        name: "{{ tomcat_package_name[ansible_distribution] }}"
+        state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Tomcat (Amazon Linux)
+      dnf:
+        name: "{{ tomcat_package_name['Amazon'] }}"
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Maven (Non-Amazon)
+      package:
+        name: "maven"
+        state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Maven (Amazon Linux)
+      dnf:
+        name: "maven"
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    - name: Install Git (Non-Amazon)
+      package:
+        name: "git"
+        state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Git (Amazon Linux)
+      dnf:
+        name: "git"
+        state: present
+      when: ansible_distribution == 'Amazon'
 
     - name: Ensure Tomcat is running and enabled
       service:
