@@ -1,11 +1,26 @@
 pipeline {
     agent any
-
+    environment {
+        // ID reference
+        GIT_CREDENTIALS_ID = 'github'
+    }
     stages {
         stage('Checkout') {
             steps {
-                // Check out the source code from the Git repository
-                git 'https://github.com/lizbabz/JavaCalculator.git'
+                // Using git credentials to check out to repo
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/main']], 
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [
+                        [
+                            credentialsId: "${env.GIT_CREDENTIALS_ID}",
+                            url: 'https://github.com/lizbabz/JavaCalculator.git'
+                        ]
+                    ]
+                ])
             }
         }
         
