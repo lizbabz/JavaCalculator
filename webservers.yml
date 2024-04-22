@@ -44,6 +44,13 @@
       package:
         name: "maven"
         state: present
+      when: ansible_distribution != 'Amazon'
+
+    - name: Install Maven (Amazon Linux)
+      dnf:
+        name: "maven"
+        state: present
+      when: ansible_distribution == 'Amazon'
 
     - name: Install Git
       package:
