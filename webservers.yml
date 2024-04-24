@@ -85,7 +85,7 @@
     - name: Deploy Java Web Calculator (Red Hat)
       copy:
         src: "/var/lib/jenkins/workspace/WebCalculatorPipeline/target/WebAppCal-0.0.6.war"
-        dest: "/var/lib/tomcat/webapps"
+        dest: "/var/lib/tomcat/webapps/"
       notify: restart tomcat
 
   handlers:
