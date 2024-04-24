@@ -1,13 +1,14 @@
 pipeline {
     agent any
     environment {
-        // ID reference
+        // ID reference for Git and SSH credentials
         GIT_CREDENTIALS_ID = 'github'
+        SSH_CREDENTIALS_ID = 'ssh'
     }
     stages {
         stage('Checkout') {
             steps {
-                // Using git credentials to check out to repo
+                // Using Git credentials to check out the repo
                 checkout([
                     $class: 'GitSCM',
                     branches: [[name: '*/main']], 
@@ -26,16 +27,16 @@ pipeline {
         
         stage('Build') {
             steps {
-                // Build the project using Maven
-                ws('/home/ubuntu/JavaCalculator') {
-                    sh 'mvn clean package'
-                }
+                // Build the project using Maven in batch mode
+                sh 'mvn -B clean package'
             }
         }
         
         stage('Deploy') {
             steps {
-                ws('/home/ubuntu/JavaCalculator') {
+                // Use the sshagent to provide SSH credentials for Ansible
+                sshagent([env.SSH_CREDENTIALS_ID]) {
+                    // Running the Ansible playbook
                     sh 'ansible-playbook -vvv webservers.yml -i hosts.ini -e ansible_python_interpreter=/usr/bin/python3'
                 }
             }
@@ -43,17 +44,14 @@ pipeline {
         
         stage('Post-Deployment Check') {
             steps {
-                ws('/home/ubuntu/JavaCalculator') {
-                    script {
-                        // Define a list of server IPs
-                        def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
-                        // Iterate through each IP to check if the application is accessible
-                        serverIps.each { ip ->
-                            echo "Checking application status on server: ${ip}"
-                            def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}/JavaWebCalculator/", returnStdout: true).trim()
-                            if (response != '200') {
-                                error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
-                            }
+                script {
+                    // Define a list of server IPs and check if the application is accessible
+                    def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
+                    serverIps.each { ip ->
+                        echo "Checking application status on server: ${ip}"
+                        def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}:8080/WebAppCal-0.0.6/", returnStdout: true).trim()
+                        if (response != '200') {
+                            error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
                         }
                     }
                 }
@@ -63,11 +61,9 @@ pipeline {
 
     post {
         success {
-            // Actions to take if the pipeline completes successfully
             echo 'Deployment succeeded!'
         }
         failure {
-            // Actions to take if the pipeline fails
             echo 'Deployment failed.'
         }
     }
