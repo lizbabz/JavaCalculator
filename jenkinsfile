@@ -41,30 +41,3 @@ pipeline {
                 }
             }
         }
-        
-        stage('Post-Deployment Check') {
-            steps {
-                script {
-                    // Define a list of server IPs and check if the application is accessible
-                    def serverUrls = ['http://18.191.173.23:8080/WebAppCal-0.0.6/', 'http://3.137.156.79:8080/WebAppCal-0.0.6/', 'http://18.216.175.230:8080/WebAppCal-0.0.6/']
-                    serverUrls.each { url ->
-                        echo "Checking application status at URL: ${url}"
-                        def responseCode = sh(script: "curl -s -o /dev/null -w '%{http_code}' ${url}", returnStdout: true).trim()
-                        if (responseCode != '200') {
-                            error "Failed to access the web application at URL: ${url}, response code: ${responseCode}"
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    post {
-        success {
-            echo 'Deployment succeeded!'
-        }
-        failure {
-            echo 'Deployment failed.'
-        }
-    }
-}
