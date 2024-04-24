@@ -42,16 +42,24 @@ pipeline {
             }
         }
         
-        stage('Post-Deployment Check') {
+ stage('Post-Deployment Check') {
             steps {
                 script {
-                    // Define a list of server IPs and check if the application is accessible
-                    def serverIps = ['18.216.175.230', '3.137.156.79', '18.191.173.23']
-                    serverIps.each { ip ->
-                        echo "Checking application status on server: ${ip}"
-                        def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' http://${ip}:8080/WebAppCal-0.0.6/", returnStdout: true).trim()
+                    // Define a list of server IPs and URLs to check
+                    def servers = [
+                        '18.191.173.23',
+                        '3.137.156.79',
+                        '18.216.175.230'
+                    ]
+                    def port = 8080
+                    def contextPath = '/WebAppCal-0.0.6/'
+                    
+                    servers.each { ip ->
+                        def url = "http://${ip}:${port}${contextPath}"
+                        echo "Checking application status on server: ${url}"
+                        def response = sh(script: "curl -s -o /dev/null -w '%{http_code}' ${url}", returnStdout: true).trim()
                         if (response != '200') {
-                            error "Failed to access the Java Web Calculator on server ${ip}, response code: ${response}"
+                            error "Failed to access the web application on server ${ip}, response code: ${response}"
                         }
                     }
                 }
